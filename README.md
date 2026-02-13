@@ -4,6 +4,14 @@ tmux is powerful but its commands are clunky. smux wraps it with a human-friendl
 
 ## Install
 
+### With Homebrew (recommended)
+
+```bash
+brew install jadnohra/tap/smux
+```
+
+### Without Homebrew
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/jadnohra/smux/main/install.sh | bash
 ```
