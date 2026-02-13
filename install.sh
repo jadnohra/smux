@@ -227,5 +227,11 @@ if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
     echo ""
 fi
 
+# Set up ~/.tmux.conf with mouse support if it doesn't exist
+if [[ ! -f "$HOME/.tmux.conf" ]]; then
+    echo "set -g mouse on" > "$HOME/.tmux.conf"
+    echo -e "${GREEN}✓ Created ~/.tmux.conf with mouse support${NC}"
+fi
+
 echo -e "${GREEN}✓ smux installed to ${INSTALL_DIR}/smux${NC}"
 echo -e "${DIM}Run 'smux help' to get started.${NC}"
