@@ -19,35 +19,27 @@ curl -sSL https://raw.githubusercontent.com/jadnohra/smux/main/install.sh | bash
 ## Usage
 
 ```
-smux                    list sessions, pick one to reattach
-smux new                new local session
-smux new myproject      new named session
-smux new user@host      new session that SSHs into host
-smux kill               pick a session to kill
-smux kill-all           kill all sessions
+smux new name              new session with a name
+smux new name user@host    new session that SSHs into host
+smux ls                    list sessions
+smux attach                pick a session to reattach
+smux attach name           reattach to a session by name
+smux kill                  pick a session to kill
+smux kill-all              kill all sessions
 ```
 
 ## Why?
 
-Terminal crashed? SSH dropped? No problem — your sessions are still alive. Just type `smux` and pick up where you left off.
+Terminal crashed? SSH dropped? No problem — your sessions are still alive.
 
 ```
-$ smux
+$ smux ls
 
   [1] db-prod     —  3 windows  ○ detached  (Feb 13 10:00)
   [2] api-server  —  1 window   ○ detached  (Feb 13 09:30)
   [3] local       —  2 windows  ● attached  (Feb 12 14:00)
 
-Reattach to [1-3]:
-```
-
-If there's only one detached session, it reattaches immediately — no questions asked.
-
-SSH sessions auto-name themselves from the hostname:
-
-```
-$ smux new root@db-prod.example.com
-Connecting to root@db-prod.example.com as session db-prod...
+$ smux attach db-prod
 ```
 
 ## Requirements
