@@ -78,10 +78,6 @@ pick_session() {
     fi
 }
 
-name_from_host() {
-    echo "$1" | sed 's/.*@//' | cut -d. -f1
-}
-
 cmd_list_and_attach() {
     local sessions
     sessions=$(get_sessions) || true
@@ -110,26 +106,18 @@ cmd_list_and_attach() {
 }
 
 cmd_new() {
-    local arg="${1:-}"
-    if [[ -z "$arg" ]]; then
-        tmux new-session
-        return
+    local name="${1:-}"
+    local host="${2:-}"
+    if [[ -z "$name" ]]; then
+        echo -e "${RED}Usage:${NC} smux new ${DIM}name${NC} [${DIM}user@host${NC}]"
+        exit 1
     fi
-    if [[ "$arg" == *@* ]] || [[ "$arg" == *.* ]]; then
-        local session_name
-        session_name=$(name_from_host "$arg")
-        if tmux has-session -t "$session_name" 2>/dev/null; then
-            local i=2
-            while tmux has-session -t "${session_name}-${i}" 2>/dev/null; do
-                ((i++))
-            done
-            session_name="${session_name}-${i}"
-        fi
-        echo -e "${DIM}Connecting to${NC} ${CYAN}$arg${NC} ${DIM}as session${NC} ${CYAN}$session_name${NC}${DIM}...${NC}"
-        tmux new-session -s "$session_name" "ssh $arg"
-        return
+    if [[ -n "$host" ]]; then
+        echo -e "${DIM}Connecting to${NC} ${CYAN}$host${NC} ${DIM}as session${NC} ${CYAN}$name${NC}${DIM}...${NC}"
+        tmux new-session -s "$name" "ssh $host"
+    else
+        tmux new-session -s "$name"
     fi
-    tmux new-session -s "$arg"
 }
 
 cmd_kill() {
@@ -170,10 +158,8 @@ cmd_kill_all() {
 cmd_help() {
     echo -e "${CYAN}smux${NC} — simple tmux"
     echo ""
-    echo -e "  ${BOLD}smux${NC}                  list sessions, pick one to reattach"
-    echo -e "  ${BOLD}smux new${NC}              new local session"
-    echo -e "  ${BOLD}smux new ${DIM}name${NC}         new session with a name"
-    echo -e "  ${BOLD}smux new ${DIM}user@host${NC}   new session that SSHs into host"
+    echo -e "  ${BOLD}smux new ${DIM}name${NC}              new session with a name"
+    echo -e "  ${BOLD}smux new ${DIM}name user@host${NC}  new session that SSHs into host"
     echo -e "  ${BOLD}smux kill${NC}             pick a session to kill"
     echo -e "  ${BOLD}smux kill-all${NC}         kill all sessions"
     echo -e "  ${BOLD}smux help${NC}             this message"
@@ -182,23 +168,15 @@ cmd_help() {
 }
 
 case "${1:-}" in
-    "")        cmd_list_and_attach ;;
-    new)       shift; cmd_new "${1:-}" ;;
+    "")        cmd_help ;;
+    new)       shift; cmd_new "${1:-}" "${2:-}" ;;
     kill)      cmd_kill ;;
     kill-all)  cmd_kill_all ;;
-    help|-h)   cmd_help ;;
+    help|-h|--help)   cmd_help ;;
     *)
-        if [[ "$1" == *@* ]] || [[ "$1" == *.* ]]; then
-            cmd_new "$1"
-        else
-            if tmux has-session -t "$1" 2>/dev/null; then
-                tmux attach -t "$1"
-            else
-                echo -e "${RED}Unknown command or session:${NC} $1"
-                echo -e "Run ${CYAN}smux help${NC} for usage."
-                exit 1
-            fi
-        fi
+        echo -e "${RED}Unknown command:${NC} $1"
+        echo -e "Run ${CYAN}smux help${NC} for usage."
+        exit 1
         ;;
 esac
 SMUX_SCRIPT
