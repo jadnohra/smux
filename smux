@@ -54,6 +54,20 @@ pick_session() {
     fi
 }
 
+cmd_list() {
+    local sessions
+    sessions=$(get_sessions) || true
+    if [[ -z "$sessions" ]]; then
+        echo -e "${DIM}No sessions running.${NC}"
+        return
+    fi
+    local i=1
+    while IFS= read -r line; do
+        format_session "$line" "$i"
+        ((i++))
+    done <<< "$sessions"
+}
+
 cmd_list_and_attach() {
     local sessions
     sessions=$(get_sessions) || true
@@ -88,11 +102,28 @@ cmd_new() {
         echo -e "${RED}Usage:${NC} smux new ${DIM}name${NC} [${DIM}user@host${NC}]"
         exit 1
     fi
+    if tmux has-session -t "$name" 2>/dev/null; then
+        echo -e "${RED}Session '$name' already exists.${NC} Use: ${CYAN}smux attach $name${NC}"
+        exit 1
+    fi
     if [[ -n "$host" ]]; then
         echo -e "${DIM}Connecting to${NC} ${CYAN}$host${NC} ${DIM}as session${NC} ${CYAN}$name${NC}${DIM}...${NC}"
         tmux new-session -s "$name" "ssh $host"
     else
         tmux new-session -s "$name"
+    fi
+}
+
+cmd_attach() {
+    local name="${1:-}"
+    if [[ -n "$name" ]]; then
+        if ! tmux has-session -t "$name" 2>/dev/null; then
+            echo -e "${RED}No session named '$name'.${NC}"
+            exit 1
+        fi
+        tmux attach -t "$name"
+    else
+        cmd_list_and_attach
     fi
 }
 
@@ -136,7 +167,10 @@ cmd_help() {
     echo ""
     echo -e "  ${BOLD}smux new ${DIM}name${NC}              new session with a name"
     echo -e "  ${BOLD}smux new ${DIM}name user@host${NC}  new session that SSHs into host"
-    echo -e "  ${BOLD}smux kill${NC}             pick a session to kill"
+    echo -e "  ${BOLD}smux ls${NC}                       list sessions"
+    echo -e "  ${BOLD}smux attach${NC}                   pick a session to reattach"
+    echo -e "  ${BOLD}smux attach ${DIM}name${NC}             reattach to a session by name"
+    echo -e "  ${BOLD}smux kill${NC}                     pick a session to kill"
     echo -e "  ${BOLD}smux kill-all${NC}         kill all sessions"
     echo -e "  ${BOLD}smux help${NC}             this message"
     echo ""
@@ -146,6 +180,8 @@ cmd_help() {
 case "${1:-}" in
     "")        cmd_help ;;
     new)       shift; cmd_new "${1:-}" "${2:-}" ;;
+    ls|list)   cmd_list ;;
+    attach)    shift; cmd_attach "${1:-}" ;;
     kill)      cmd_kill ;;
     kill-all)  cmd_kill_all ;;
     help|-h|--help)   cmd_help ;;
