@@ -5,6 +5,7 @@
 set -euo pipefail
 
 GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
 CYAN='\033[1;36m'
 DIM='\033[2m'
 NC='\033[0m'
