@@ -42,6 +42,10 @@ $ smux ls
 $ smux attach db-prod
 ```
 
+## Mouse scrolling
+
+On install, smux creates `~/.tmux.conf` with `set -g mouse on` if the file doesn't exist. This enables mouse scrolling, pane clicking, and pane resizing.
+
 ## Requirements
 
 - bash
