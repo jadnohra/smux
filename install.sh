@@ -206,7 +206,7 @@ chmod +x "$INSTALL_DIR/smux"
 
 # Check if INSTALL_DIR is in PATH
 if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
-    echo -e "${YELLOW}Note:${NC} Add this to your shell config (~/.bashrc or ~/.zshrc):"
+    echo -e "\033[1;33mNote:\033[0m Add this to your shell config (~/.bashrc or ~/.zshrc):"
     echo ""
     echo "  export PATH=\"$INSTALL_DIR:\$PATH\""
     echo ""
